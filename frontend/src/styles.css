@@ -1,0 +1,783 @@
+@import 'tailwindcss';
+
+/* A monochrome palette keeps the interface focused on the drawing. */
+:root {
+  font-family: Inter, 'Segoe UI', Arial, sans-serif;
+  color: #ededed;
+  background: #0a0a0a;
+  font-synthesis: none;
+  color-scheme: dark;
+  font-size: 14px;
+  --accent: #ffffff;
+  --muted: #a3a3a3;
+  --line: #2d2d2d;
+  --surface: #141414;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+  color: inherit;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+button svg {
+  flex-shrink: 0;
+}
+
+button,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Let the page grow so the canvas is never reduced to fit the viewport height. */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 1600px);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 58px;
+  border-bottom: 1px solid var(--line);
+}
+
+.site-title,
+.privacy-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.site-title h1 {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+}
+
+.site-title > span {
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.privacy-note {
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 16px 0 12px;
+}
+
+/* Instructions always precede the tools and drawing area. */
+.instructions {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.instructions-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.instructions-heading h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.instructions-heading p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.instruction-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.instruction-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.step-number {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #444444;
+  border-radius: 50%;
+  color: #cccccc;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.instruction-steps h3 {
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.5;
+}
+
+.instruction-steps p {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Text labels keep the toolbar understandable without relying on icon tooltips. */
+.toolbar,
+.toolbar-actions,
+.mode-switch,
+.brush-label {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar {
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  padding: 8px 0;
+}
+
+.mode-switch {
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.mode-switch button,
+.tool-button,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 7px 11px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.mode-switch button {
+  color: var(--muted);
+}
+
+.mode-switch .selected {
+  color: #ffffff;
+  background: #303030;
+}
+
+.button {
+  border-color: #484848;
+  background: #252525;
+}
+
+.button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #111111;
+  font-weight: 600;
+}
+
+.tool-button {
+  color: #c4c4c4;
+}
+
+.tool-button.active {
+  border-color: #444444;
+  color: #ffffff;
+  background: #252525;
+}
+
+button:hover:not(:disabled) {
+  background: #343434;
+}
+
+.button.primary:hover:not(:disabled) {
+  background: #dddddd;
+}
+
+.brush-label {
+  gap: 10px;
+  color: #c4c4c4;
+  font-size: 13px;
+}
+
+.brush-label input {
+  width: 90px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.brush-value {
+  min-width: 29px;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.toolbar-actions {
+  gap: 5px;
+  margin-left: auto;
+}
+
+.toolbar-actions .primary {
+  margin-left: 7px;
+}
+
+/* Give the canvas more room than the camera while retaining its 4:3 aspect ratio. */
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+}
+
+.panel-heading,
+.camera-footer,
+.canvas-footer {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+}
+
+.panel-heading {
+  min-height: 44px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-heading > div,
+.camera-footer > span,
+.canvas-footer > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.panel-heading h2 {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.panel-heading svg {
+  color: var(--muted);
+}
+
+.badge,
+.canvas-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.badge i,
+.canvas-status i,
+.tracking-pill i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #777777;
+}
+
+.badge-active,
+.ink-active {
+  color: var(--accent);
+}
+
+.badge-active i,
+.ink-active i,
+.tracking-pill i.found {
+  background: var(--accent);
+}
+
+/* Full-width surfaces keep pointer and landmark coordinates proportional. */
+.panel-body {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  background: #101010;
+}
+
+.camera-stage,
+.canvas-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #181818;
+}
+
+.camera-stage video,
+.hand-overlay,
+.canvas-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.camera-stage video {
+  object-fit: fill;
+  transform: scaleX(-1);
+  opacity: 0;
+}
+
+.camera-stage video.visible {
+  opacity: 1;
+}
+
+.hand-overlay {
+  pointer-events: none;
+}
+
+.camera-empty,
+.canvas-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  text-align: center;
+}
+
+.empty-icon {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+  color: #888888;
+}
+
+.camera-empty h3,
+.canvas-empty h3 {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.camera-empty p,
+.canvas-empty p {
+  max-width: 270px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.camera-empty .button {
+  margin-top: 18px;
+}
+
+.camera-footer,
+.canvas-footer {
+  min-height: 38px;
+  padding: 9px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #dddddd;
+  font-size: inherit;
+  white-space: nowrap;
+}
+
+.text-button:hover:not(:disabled) {
+  background: transparent;
+  text-decoration: underline;
+}
+
+.tracking-pill {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: calc(100% - 24px);
+  padding: 7px 10px;
+  transform: translateX(-50%);
+  border: 1px solid #484848;
+  border-radius: 5px;
+  background: #161616e8;
+  font-size: 12px;
+}
+
+/* The grid and tracking overlays are never included in PNG exports. */
+.show-grid {
+  background-image: radial-gradient(#3c3c3c 0.7px, transparent 0.7px);
+  background-size: 20px 20px;
+}
+
+.canvas-stage canvas {
+  z-index: 2;
+  touch-action: none;
+}
+
+.canvas-empty {
+  pointer-events: none;
+}
+
+.footer-dot {
+  color: #858585;
+}
+
+.air-cursor {
+  position: absolute;
+  z-index: 3;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--accent);
+  border-radius: 50%;
+  background: #ffffff33;
+  pointer-events: none;
+}
+
+.air-cursor.is-drawing {
+  width: 13px;
+  height: 13px;
+  background: var(--accent);
+}
+
+.clear-progress {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  z-index: 4;
+  padding: 9px 12px 12px;
+  overflow: hidden;
+  transform: translateX(-50%);
+  border: 1px solid #666666;
+  border-radius: 5px;
+  background: #252525;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.clear-progress > div {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+}
+
+.workspace-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Errors and confirmation dialogs use direct, actionable messages. */
+.error-banner {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #666666;
+  border-radius: 6px;
+  background: #242424;
+  color: #eeeeee;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.error-banner > svg {
+  flex-shrink: 0;
+}
+
+.error-banner button {
+  margin-left: auto;
+}
+
+.toast {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: calc(100% - 32px);
+  padding: 12px 16px;
+  transform: translateX(-50%);
+  border: 1px solid #555555;
+  border-radius: 6px;
+  background: #242424;
+  color: #eeeeee;
+  font-size: 13px;
+}
+
+.spin {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+dialog {
+  width: min(440px, calc(100% - 32px));
+  margin: auto;
+  padding: 26px;
+  border: 1px solid #484848;
+  border-radius: 8px;
+  background: var(--surface);
+  color: #ededed;
+}
+
+dialog::backdrop {
+  background: #000000b3;
+}
+
+dialog h2 {
+  margin-bottom: 12px;
+  padding-right: 24px;
+  font-size: 20px;
+  font-weight: 550;
+}
+
+dialog p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.dialog-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+@media (max-width: 1100px) {
+  .app-shell {
+    padding: 0 16px;
+  }
+
+  .toolbar {
+    gap: 10px;
+  }
+
+  .brush-label {
+    gap: 7px;
+  }
+
+  .brush-label input {
+    width: 65px;
+  }
+
+  .instruction-steps {
+    gap: 12px;
+  }
+
+  .instruction-steps li {
+    gap: 7px;
+  }
+
+  .canvas-footer > span:last-child {
+    display: none;
+  }
+}
+
+/* Narrow screens scroll naturally rather than shrinking the drawing area. */
+@media (max-width: 800px) {
+  .app-shell {
+    min-height: 100svh;
+  }
+
+  .site-header {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 0;
+  }
+
+  .privacy-note {
+    font-size: 11px;
+  }
+
+  .instruction-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .toolbar-actions {
+    flex-wrap: wrap;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .toolbar-actions .primary {
+    margin-left: auto;
+  }
+
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .camera-stage {
+    max-width: 360px;
+  }
+
+  .error-banner {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding: 0 12px;
+  }
+
+  .privacy-note {
+    width: 100%;
+  }
+
+  .instructions {
+    padding: 12px;
+  }
+
+  .instructions-heading {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .instruction-steps {
+    column-gap: 10px;
+  }
+
+  .step-number {
+    width: 18px;
+    height: 18px;
+  }
+
+  .instruction-steps h3,
+  .instruction-steps p {
+    font-size: 12px;
+  }
+
+  .toolbar {
+    justify-content: space-between;
+  }
+
+  .tool-button,
+  .button {
+    gap: 5px;
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  .camera-footer,
+  .canvas-footer {
+    padding-inline: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}
