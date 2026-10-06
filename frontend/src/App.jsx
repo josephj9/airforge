@@ -80,7 +80,6 @@ export default function App() {
       <header className="site-header">
         <div className="site-title">
           <h1>AirForge</h1>
-          <span>Air drawing</span>
         </div>
         <span className="privacy-note">
           <ShieldCheck size={15} />
