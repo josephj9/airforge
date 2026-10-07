@@ -4,6 +4,7 @@ import Webcam from './components/Webcam.jsx';
 import DrawingCanvas from './components/DrawingCanvas.jsx';
 import Toolbar from './components/Toolbar.jsx';
 import GestureControls from './components/GestureControls.jsx';
+import Star from './components/Star.jsx'; 
 import { useDrawing } from './hooks/useDrawing.js';
 import { useHandTracking } from './hooks/useHandTracking.js';
 
@@ -123,8 +124,8 @@ export default function App() {
             }}
           />
           <DrawingCanvas {...{ drawing, mode, grid }} gesture={tracking.gesture} />
+          <Star />
         </div>
-
         <p className="workspace-note">
           Sketches are not saved automatically. Export a PNG to keep your drawing.
         </p>

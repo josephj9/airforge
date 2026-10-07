@@ -123,6 +123,7 @@ export default function Webcam({ tracking }) {
             Stop camera
           </button>
         ) : null}
+
       </div>
     </section>
   );
