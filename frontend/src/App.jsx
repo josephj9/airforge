@@ -5,6 +5,7 @@ import DrawingCanvas from './components/DrawingCanvas.jsx';
 import Toolbar from './components/Toolbar.jsx';
 import GestureControls from './components/GestureControls.jsx';
 import Star from './components/Star.jsx'; 
+import generateWebsite from './lib/api.js';
 import { useDrawing } from './hooks/useDrawing.js';
 import { useHandTracking } from './hooks/useHandTracking.js';
 
@@ -75,6 +76,28 @@ export default function App() {
   }, [confirmClear, drawing.end]);
 
   const closeDialog = () => setConfirmClear(false);
+  async function handleGenerate() {
+    if (drawing.count === 0 && !drawing.drawing) {
+      setNotice('Draw something first.');
+      return;
+    }
+
+    setNotice('Website creation started.');
+
+    try {
+      const blob = await drawing.getPngBlob();
+
+      if (!blob) {
+        setNotice('Could not create sketch image.');
+        return;
+      }
+      const result = await generateWebsite(blob);
+      console.log(result);
+    } catch (error) {
+      setNotice(error.message || 'Could not generate website.');
+    }
+  }
+
 
   return (
     <div className="app-shell">
@@ -98,6 +121,7 @@ export default function App() {
             drawing.exportPng();
             setNotice('PNG download started.');
           }}
+          generate={handleGenerate}
         />
 
         {tracking.error && (
@@ -113,18 +137,20 @@ export default function App() {
         )}
 
         <div className="workspace-grid">
-          <Webcam
-            tracking={{
-              ...tracking,
-              start: () => {
-                drawing.end();
-                setModeState('air');
-                tracking.start();
-              },
-            }}
-          />
+          <div style={{ minWidth: 0 }}>
+            <Webcam
+              tracking={{
+                ...tracking,
+                start: () => {
+                  drawing.end();
+                  setModeState('air');
+                  tracking.start();
+                },
+              }}
+            />
+            <Star />
+          </div>
           <DrawingCanvas {...{ drawing, mode, grid }} gesture={tracking.gesture} />
-          <Star />
         </div>
         <p className="workspace-note">
           Sketches are not saved automatically. Export a PNG to keep your drawing.

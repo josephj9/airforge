@@ -235,6 +235,14 @@ main {
   font-weight: 600;
 }
 
+.button.generate {
+  border-color: #b91c1c;
+  background: #b91c1c;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+
 .tool-button {
   color: #c4c4c4;
 }
@@ -245,7 +253,7 @@ main {
   background: #252525;
 }
 
-button:hover:not(:disabled) {
+button:hover:not(:disabled):not(.generate) {
   background: #343434;
 }
 

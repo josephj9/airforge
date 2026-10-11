@@ -10,6 +10,7 @@ export default function Toolbar({
   drawing,
   requestClear,
   exportSketch,
+  generate
 }) {
   const hasStrokes = drawing.count > 0 || drawing.drawing;
 
@@ -73,6 +74,9 @@ export default function Toolbar({
         <button className="button primary" disabled={!hasStrokes} onClick={exportSketch}>
           <Download size={16} />
           Export PNG
+        </button>
+        <button className="button generate" disabled={!hasStrokes} onClick={generate}>
+          Generate Website
         </button>
       </div>
     </div>

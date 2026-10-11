@@ -22,6 +22,7 @@ export function useDrawing() {
     strokes.current.forEach((s) => paintStroke(ctx, s));
     if (current.current) paintStroke(ctx, current.current);
   }, []);
+
   const end = useCallback(() => {
     if (current.current) {
       strokes.current.push(current.current);
@@ -30,6 +31,7 @@ export function useDrawing() {
     }
     setDrawing(false);
   }, []);
+
   const move = useCallback(
     (point, down) => {
       if (!point || !down) {
@@ -48,12 +50,14 @@ export function useDrawing() {
     },
     [end, redraw],
   );
+
   const undo = useCallback(() => {
     end();
     strokes.current.pop();
     setCount(strokes.current.length);
     redraw();
   }, [end, redraw]);
+
   const clear = useCallback(() => {
     current.current = null;
     strokes.current = [];
@@ -61,6 +65,7 @@ export function useDrawing() {
     setDrawing(false);
     redraw();
   }, [redraw]);
+
   const exportPng = useCallback(() => {
     end();
     const output = document.createElement('canvas');
@@ -79,5 +84,27 @@ export function useDrawing() {
         );
     }, 'image/png');
   }, [end]);
-  return { canvasRef, brush, count, drawing, move, end, undo, clear, exportPng };
+
+const getPngBlob = useCallback(() => {
+  end();
+
+  const output = document.createElement('canvas');
+  output.width = CANVAS_WIDTH;
+  output.height = CANVAS_HEIGHT;
+
+  const ctx = output.getContext('2d');
+
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+  strokes.current.forEach((s) => paintStroke(ctx, s, '#202020'));
+
+  return new Promise((resolve) => {
+    output.toBlob((blob) => {
+      resolve(blob);
+    }, 'image/png');
+  });
+}, [end]);
+
+  return { canvasRef, brush, count, drawing, move, end, undo, clear, exportPng, getPngBlob };
 }
